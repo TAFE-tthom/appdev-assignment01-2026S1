@@ -1,0 +1,280 @@
+﻿namespace SnapshotKV.Test;
+
+public class QueryOperationsTest
+{
+
+    [Fact]
+    public void Test_EmptyKeys_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.ListKeys(),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("ListKeys")
+                .SetResults(new int[]{})
+                .SetRecKey(null)
+                .SetSuccess(true)
+                .Build()
+        );
+    }
+
+    [Fact]
+    public void Test_SetEntry_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.SetEntry(
+                1,
+                new int[] {6, 5, 4}
+            ),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("SetEntry")
+                .SetRecKey(1)
+                .SetResults(new int[]{6, 5, 4})
+                .SetSuccess(true)
+                .Build()
+        );
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.ListKeys(),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("ListKeys")
+                .SetResults(new int[]{ 1 })
+                .SetRecKey(null)
+                .SetSuccess(true)
+                .Build()
+        );
+    }
+
+    [Fact]
+    public void Test_SetEntrysWithGet_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.SetEntry(
+                1,
+                new int[] {6, 5, 4}
+            ),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("SetEntry")
+                .SetRecKey(1)
+                .SetResults(new int[]{6, 5, 4})
+                .SetSuccess(true)
+                .Build()
+        );
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.ListKeys(),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("ListKeys")
+                .SetResults(new int[]{ 1 })
+                .SetRecKey(null)
+                .SetSuccess(true)
+                .Build()
+        );
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.GetEntry(1),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("GetEntry")
+                .SetResults(new int[]{6, 5, 4})
+                .SetRecKey(1)
+                .SetSuccess(true)
+                .Build()
+        );
+    }
+
+    [Fact]
+    public void Test_SetEntrysWithGet_2()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.SetEntry(
+                1,
+                new int[] {6, 5, 4}
+            ),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("SetEntry")
+                .SetRecKey(1)
+                .SetResults(new int[]{6, 5, 4})
+                .SetSuccess(true)
+                .Build()
+        );
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.SetEntry(
+                4,
+                new int[] {87, 22, 55}
+            ),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("SetEntry")
+                .SetRecKey(4)
+                .SetResults(new int[]{87, 22, 55})
+                .SetSuccess(true)
+                .Build()
+        );
+
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.ListKeys(),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("ListKeys")
+                .SetResults(new int[]{ 1, 4 })
+                .SetRecKey(null)
+                .SetSuccess(true)
+                .Build()
+        );
+
+        SnapshotTestUtil.ValidateResults(
+            switchBoard.GetEntry(1),
+            InternalSnapshotQueryResult.Make()
+                .SetCommand("GetEntry")
+                .SetResults(new int[]{6, 5, 4})
+                .SetRecKey(1)
+                .SetSuccess(true)
+                .Build()
+        );
+    }
+
+
+    [Fact]
+    public void Test_SetEntrysWithGet_3()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(4,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(4)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.SetEntry(7,
+                new int[] {9, 9}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 9, 9 })
+                    .SetRecKey(7)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.GetEntry(4))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("GetEntry")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(4)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.GetEntry(7))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("GetEntry")
+                    .SetResults(new int[]{ 9, 9 })
+                    .SetRecKey(7)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+
+
+    [Fact]
+    public void Test_SetEntrysWithRemove_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(4,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(4)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.SetEntry(7,
+                new int[] {9, 9}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 9, 9 })
+                    .SetRecKey(7)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.RemoveEntry(4))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("RemoveEntry")
+                    .SetResults(new int[]{ })
+                    .SetRecKey(4)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.RemoveEntry(7))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("RemoveEntry")
+                    .SetResults(new int[]{ })
+                    .SetRecKey(7)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_SetEntrysWithRemove_2()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(10,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.RemoveEntry(10))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("RemoveEntry")
+                    .SetResults(new int[]{ })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    
+}
