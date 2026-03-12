@@ -7,9 +7,17 @@ public class InternalSnapshotQueryBuilder {
     private int? recKey = -1;
     private bool success = false;
 
+    private bool[] ignoreSet = { false, false, false, false };
+
     public InternalSnapshotQueryBuilder SetCommand(string cmd)
     {
         this.command = cmd;
+        return this;
+    }
+
+    public InternalSnapshotQueryBuilder IgnoreCommand()
+    {
+        this.ignoreSet[0] = false;
         return this;
     }
 
@@ -18,9 +26,22 @@ public class InternalSnapshotQueryBuilder {
         this.results = results;
         return this;
     }
+    
+    public InternalSnapshotQueryBuilder IgnoreResults()
+    {
+        this.ignoreSet[1] = false;
+        return this;
+    }
+    
     public InternalSnapshotQueryBuilder SetRecKey(int? recKey)
     {
         this.recKey = recKey;
+        return this;
+    }
+    
+    public InternalSnapshotQueryBuilder IgnoreRecKey()
+    {
+        this.ignoreSet[2] = false;
         return this;
     }
 
@@ -29,11 +50,17 @@ public class InternalSnapshotQueryBuilder {
         this.success = success;
         return this;
     }
+    
+    public InternalSnapshotQueryBuilder IgnoreSuccess()
+    {
+        this.ignoreSet[3] = false;
+        return this;
+    }
 
     public InternalSnapshotQueryResult Build()
     {
         return new InternalSnapshotQueryResult(
-            command, results, recKey, success
+            command, results, recKey, success, ignoreSet
         );
     }
     
@@ -47,6 +74,8 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
     private int? recKey;
     private bool success;
 
+    private bool[] ignoreSet = { false, false, false, false };    
+
     public InternalSnapshotQueryResult(string cmd,
         int[] results, int? recKey, bool success)
     {
@@ -54,6 +83,14 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
         this.results = results;
         this.recKey = recKey;
         this.success = success;
+        
+    }
+
+    public InternalSnapshotQueryResult(string cmd,
+        int[] results, int? recKey, bool success, bool[] ignoreSet)
+        : this(cmd, results, recKey, success)
+    {
+        this.ignoreSet = ignoreSet;
         
     }
 
@@ -85,10 +122,20 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
 
     public void Validate(SnapshotQueryResult other)
     {
-        Assert.Equal(this.Command(), other.Command());
-        Assert.Equal(this.Results(), other.Results());
-        Assert.Equal(this.RecordedKey(), other.RecordedKey());
-        Assert.Equal(this.Success(), other.Success());
+        Action[] actions = new Action[] { 
+            () => { Assert.Equal(this.Command(), other.Command()); }, 
+            () => { Assert.Equal(this.Results(), other.Results()); }, 
+            () => { Assert.Equal(this.RecordedKey(), other.RecordedKey()); },
+            () => { Assert.Equal(this.Success(), other.Success()); },
+        };
+
+        for(int i = 0; i < actions.Length; i++)
+        {
+            if(!this.ignoreSet[i])
+            {
+                actions[i]();
+            }
+        }
     }
 }
 

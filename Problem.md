@@ -147,7 +147,7 @@ Let's assume key `54` existed and had the entry `[22, 44, 12]`, if a `Push 54 [8
   Success = true
 ```
 
-If the key does not exist, it will operation like `SetEntry`.
+If the key does not exist, it will operate like `SetEntry`.
 
 \vspace{1cm}
 
@@ -157,12 +157,12 @@ Lets assume key `54` existed and had the entry `[22, 44, 12]`, if a `Append 54 [
 
 ```
   Results = [22, 44, 12, 88, 77, 66]
-  Command = "Apend"
+  Command = "Append"
   RecordedKey = 54
   Success = true
 ```
 
-If the key does not exist, it will operation like `SetEntry`.
+If the key does not exist, it will operate like `SetEntry`.
 
 
 \vspace{1cm}
