@@ -329,4 +329,172 @@ public class QueryOperationsTest
             .Run();
 
     }
+    
+    [Fact]
+    public void Test_SetEntryView_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(10,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.SetEntry(55,
+                new int[]{88, 99, 11}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 88, 99, 11 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.View(10, 0, 1))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("View")
+                    .SetResults(new int[]{ 6, 4 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_SetEntryView_2()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(10,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.SetEntry(55,
+                new int[]{88, 99, 11, 90, 98, 102}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 88, 99, 11, 90, 98, 102 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.View(55, 2, 5))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("View")
+                    .SetResults(new int[]{ 11, 90, 98, 102 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_MakeWatcher_ViewWatcher_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(55,
+                new int[]{88, 99, 11, 90, 98, 102}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 88, 99, 11, 90, 98, 102 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.MakeWatcher(55, 2, 5))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("MakeWatcher")
+                    .IgnoreResults()
+                    .IgnoreRecKey()
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.ViewWatcher(1))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("ViewWatcher")
+                    .SetResults(new int[]{ 11, 90, 98, 102 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+
+    [Fact]
+    public void Test_MakeWatcher_ViewWatcher_2()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(55,
+                new int[]{88, 99, 11, 90, 98, 102}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 88, 99, 11, 90, 98, 102 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.MakeWatcher(55, 1, 5))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("MakeWatcher")
+                    .IgnoreResults()
+                    .IgnoreRecKey()
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.ViewWatcher(1))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("ViewWatcher")
+                    .SetResults(new int[]{ 99, 11, 90, 98, 102 })
+                    .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
 }
