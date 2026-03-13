@@ -11,49 +11,53 @@ public class InternalSnapshotQueryBuilder {
 
     public InternalSnapshotQueryBuilder SetCommand(string cmd)
     {
+        this.ignoreSet[0] = false;
         this.command = cmd;
         return this;
     }
 
     public InternalSnapshotQueryBuilder IgnoreCommand()
     {
-        this.ignoreSet[0] = false;
+        this.ignoreSet[0] = true;
         return this;
     }
 
     public InternalSnapshotQueryBuilder SetResults(int[] results)
     {
+        this.ignoreSet[1] = false;
         this.results = results;
         return this;
     }
     
     public InternalSnapshotQueryBuilder IgnoreResults()
     {
-        this.ignoreSet[1] = false;
+        this.ignoreSet[1] = true;
         return this;
     }
     
     public InternalSnapshotQueryBuilder SetRecKey(int? recKey)
     {
+        this.ignoreSet[2] = false;
         this.recKey = recKey;
         return this;
     }
     
     public InternalSnapshotQueryBuilder IgnoreRecKey()
     {
-        this.ignoreSet[2] = false;
+        this.ignoreSet[2] = true;
         return this;
     }
 
     public InternalSnapshotQueryBuilder SetSuccess(bool success)
     {
+        this.ignoreSet[3] = false;
         this.success = success;
         return this;
     }
     
     public InternalSnapshotQueryBuilder IgnoreSuccess()
     {
-        this.ignoreSet[3] = false;
+        this.ignoreSet[3] = true;
         return this;
     }
 
@@ -122,6 +126,7 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
 
     public void Validate(SnapshotQueryResult other)
     {
+        
         Action[] actions = new Action[] { 
             () => { Assert.Equal(this.Command(), other.Command()); }, 
             () => { Assert.Equal(this.Results(), other.Results()); }, 
@@ -131,6 +136,7 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
 
         for(int i = 0; i < actions.Length; i++)
         {
+            Assert.Equal(other.Success(), this.Success());
             if(!this.ignoreSet[i])
             {
                 actions[i]();

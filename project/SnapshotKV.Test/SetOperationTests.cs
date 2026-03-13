@@ -23,7 +23,7 @@ public class SetOperationsTest
 			.SetOperation(() => switchBoard.Sort(ID))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
-                    .SetCommand("PartialSort")
+                    .SetCommand("Sort")
 					.IgnoreResults()
 					.IgnoreRecKey()
                     .SetSuccess(true)
@@ -100,14 +100,14 @@ public class SetOperationsTest
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
-                    .SetResults(new int[]{ 4, 7, 8})
+                    .SetResults(new int[]{ 4, 7, 8, 10, 11})
                     .SetRecKey(ID1)
                     .SetSuccess(true)
                     .Build())
             .Next()
             .SetOperation(
                 () => switchBoard.SetEntry(ID2,
-                new int[] {10, 11, 12 }))
+                new int[] {10, 11, 12, 13 }))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
@@ -143,14 +143,14 @@ public class SetOperationsTest
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
-                    .SetResults(new int[]{ 4, 7, 8})
+                    .SetResults(new int[]{ 4, 7, 8, 10, 11})
                     .SetRecKey(ID1)
                     .SetSuccess(true)
                     .Build())
             .Next()
             .SetOperation(
                 () => switchBoard.SetEntry(ID2,
-                new int[] {10, 11, 12 }))
+                new int[] {10, 11, 12, 13 }))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
@@ -162,7 +162,7 @@ public class SetOperationsTest
 			.SetOperation(() => switchBoard.Intersect(ID1, ID2))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
-                    .SetCommand("Intersection")
+                    .SetCommand("Intersect")
 					.IgnoreRecKey()
 					.SetResults(new int[]{ 10, 11 })
                     .SetSuccess(true)
@@ -181,22 +181,22 @@ public class SetOperationsTest
             .Start()
             .SetOperation(
                 () => switchBoard.SetEntry(ID1,
-                new int[] {4, 7, 8  }))
+                new int[] {4, 7, 8, 11  }))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
-                    .SetResults(new int[]{ 4, 7, 8})
+                    .SetResults(new int[]{ 4, 7, 8, 11})
                     .SetRecKey(ID1)
                     .SetSuccess(true)
                     .Build())
             .Next()
             .SetOperation(
                 () => switchBoard.SetEntry(ID2,
-                new int[] {10, 11, 12 }))
+                new int[] { 4, 10, 11, 12 }))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
-                    .SetResults(new int[]{ 4, 7, 10, 11, 12, 13 })
+                    .SetResults(new int[]{ 4, 10, 11, 12 })
                     .SetRecKey(ID2)
                     .SetSuccess(true)
                     .Build())
@@ -204,9 +204,9 @@ public class SetOperationsTest
 			.SetOperation(() => switchBoard.Intersect(ID1, ID2))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
-                    .SetCommand("Intersection")
+                    .SetCommand("Intersect")
 					.IgnoreRecKey()
-					.SetResults(new int[]{ 4, 7 })
+					.SetResults(new int[]{ 4, 11 })
                     .SetSuccess(true)
                     .Build())
 			.Next()
@@ -222,7 +222,7 @@ public class SetOperationsTest
             .Start()
             .SetOperation(
                 () => switchBoard.SetEntry(ID,
-                new int[] {6, 4, 7, 10, 3, 1}))
+                new int[] {6, 4, 7, 10, 3, 1, -10, 90, 2, 99, 65}))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
                     .SetCommand("SetEntry")
@@ -234,7 +234,7 @@ public class SetOperationsTest
 			.SetOperation(() => switchBoard.Sort(ID))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
-                    .SetCommand("PartialSort")
+                    .SetCommand("Sort")
 					.IgnoreResults()
 					.IgnoreRecKey()
                     .SetSuccess(true)
