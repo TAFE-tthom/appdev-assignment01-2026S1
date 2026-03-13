@@ -29,7 +29,6 @@ public class SetOperationsTest
                     .SetSuccess(true)
                     .Build())
 			.Next()
-			.Next()
             .SetOperation(() => switchBoard.GetEntry(ID))
             .SetExpected(
                 InternalSnapshotQueryResult.Make()
