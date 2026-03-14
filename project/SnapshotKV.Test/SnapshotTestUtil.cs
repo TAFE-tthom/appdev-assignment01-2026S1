@@ -71,7 +71,7 @@ public class InternalSnapshotQueryBuilder {
 }
 
 
-public class InternalSnapshotQueryResult : SnapshotQueryResult
+public class InternalSnapshotQueryResult : SnapshotQueryResult, SnapshotDBOpResult
 {
     private string command;
     private int[] results;
@@ -79,6 +79,9 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
     private bool success;
 
     private bool[] ignoreSet = { false, false, false, false };    
+
+    private bool isDBOper = false;
+    private SnapshotKVDB? database = null;
 
     public InternalSnapshotQueryResult(string cmd,
         int[] results, int? recKey, bool success)
@@ -88,6 +91,15 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
         this.recKey = recKey;
         this.success = success;
         
+    }
+    public InternalSnapshotQueryResult(string cmd,
+        bool dbsuccess) : this(cmd, new int[0], null, dbsuccess)
+    {
+        this.isDBOper = true;
+    }
+
+    public SnapshotKVDB? Database() {
+        return database;
     }
 
     public InternalSnapshotQueryResult(string cmd,
@@ -101,6 +113,12 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
     public static InternalSnapshotQueryBuilder Make()
     {
         return new InternalSnapshotQueryBuilder();
+    }
+
+    public static InternalSnapshotQueryResult MakeDB(string cmd,
+        bool success)
+    {
+        return new InternalSnapshotQueryResult(cmd, success);
     }
 
     public string Command() {
@@ -123,6 +141,10 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
         return success;
     }
 
+    public void Validate(SnapshotDBOpResult other)
+    {
+        Assert.Equal(this.Success(), other.Success());   
+    }
 
     public void Validate(SnapshotQueryResult other)
     {
@@ -136,7 +158,7 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
 
         for(int i = 0; i < actions.Length; i++)
         {
-            Assert.Equal(other.Success(), this.Success());
+            Assert.Equal(this.Success(), other.Success());
             if(!this.ignoreSet[i])
             {
                 actions[i]();
@@ -148,7 +170,10 @@ public class InternalSnapshotQueryResult : SnapshotQueryResult
 public class SnapshotTestScenarioOperation
 {
     public Func<SnapshotQueryResult>? CurrentOperation = null;
+    public Func<SnapshotDBOpResult>? CurrentDBOperation = null;
     public InternalSnapshotQueryResult? Expected = null;
+    public bool IsDBOperation = false;
+
 }
 
 public class SnapshotTestScenarioBuilder
@@ -167,6 +192,15 @@ public class SnapshotTestScenarioBuilder
         return this;
     }
 
+    public SnapshotTestScenarioBuilder SetDBOperation(
+        Func<SnapshotDBOpResult> operation
+    )
+    {
+        currentOperation.IsDBOperation = true;
+        currentOperation.CurrentDBOperation = operation;
+        return this;
+    }
+
     public SnapshotTestScenarioBuilder SetExpected(
         InternalSnapshotQueryResult expected
     )
@@ -177,15 +211,29 @@ public class SnapshotTestScenarioBuilder
 
     public SnapshotTestScenarioBuilder Next()
     {
-        if(currentOperation.CurrentOperation != null &&
-            currentOperation.Expected != null) {
-            operations.Add(currentOperation);
+        if(currentOperation.IsDBOperation) {
+            if(currentOperation.CurrentDBOperation != null &&
+                currentOperation.Expected != null) {
+                operations.Add(currentOperation);
+            }
+            else
+            {
+                throw new Exception("Unable to construct next stage for Scenario");
+            }
+            currentOperation = new SnapshotTestScenarioOperation();
+            
+        } else {
+    
+            if(currentOperation.CurrentOperation != null &&
+                currentOperation.Expected != null) {
+                operations.Add(currentOperation);
+            }
+            else
+            {
+                throw new Exception("Unable to construct next stage for Scenario");
+            }
+            currentOperation = new SnapshotTestScenarioOperation();
         }
-        else
-        {
-            throw new Exception("Unable to construct next stage for Scenario");
-        }
-        currentOperation = new SnapshotTestScenarioOperation();
         return this;
     }
 
@@ -196,9 +244,16 @@ public class SnapshotTestScenarioBuilder
             foreach(var op in ops)
             {
                 var exp = op.Expected;
-                var act = op.CurrentOperation;
+                
+                var queryOp = op.CurrentOperation;
+                var dbOp = op.CurrentDBOperation;
 
-                exp.Validate(act());
+                if(op.IsDBOperation) {
+                    exp.Validate(dbOp());
+                } else {
+                    exp.Validate(queryOp());
+                    
+                }
             }
         };
     }
@@ -235,6 +290,12 @@ public class SnapshotTestUtil
     public static SnapshotTestScenarioBuilder Start()
     {
         return SnapshotTestScenarioBuilder.Make();
+    }
+
+    public static InternalSnapshotQueryResult WithDB(string cmd,
+        bool expected)
+    {
+        return InternalSnapshotQueryResult.MakeDB(cmd, expected);
     }
 
 }

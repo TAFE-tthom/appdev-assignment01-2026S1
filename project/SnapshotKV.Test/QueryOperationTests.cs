@@ -372,6 +372,7 @@ public class QueryOperationsTest
             .Run();
 
     }
+
     [Fact]
     public void Test_SetEntryView_2()
     {
@@ -408,6 +409,174 @@ public class QueryOperationsTest
                     .SetCommand("View")
                     .SetResults(new int[]{ 11, 90, 98, 102 })
                     .SetRecKey(55)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_Append_Get_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.Append(10,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("Append")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.Append(10,
+                new int[]{88, 99, 11, 90, 98, 102}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("Append")
+                    .SetResults(new int[]{ 6, 4, 7, 88, 99, 11, 90, 98, 102 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.GetEntry(10))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("GetEntry")
+                    .SetResults(new int[]{ 6, 4, 7, 88, 99, 11, 90, 98, 102 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_Append_Get_2()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(10,
+                new int[] {1, 2, 3}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 1, 2, 3 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.Append(10,
+                new int[]{ 8, 9, 10 }))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("Append")
+                    .SetResults(new int[]{ 1, 2, 3, 8, 9, 10 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.GetEntry(10))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("GetEntry")
+                    .SetResults(new int[]{ 1, 2, 3, 8, 9, 10 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_Push_Get_1()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.Push(10,
+                new int[] {6, 4, 7}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("Push")
+                    .SetResults(new int[]{ 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.Push(10,
+                new int[]{88, 99, 11, 90, 98, 102}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("Push")
+                    .SetResults(new int[]{ 88, 99, 11, 90, 98, 102, 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.GetEntry(10))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("GetEntry")
+                    .SetResults(new int[]{ 88, 99, 11, 90, 98, 102, 6, 4, 7 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .Run();
+
+    }
+    [Fact]
+    public void Test_Push_Get_2()
+    {
+        SnapshotSwitchboard switchBoard = new SnapshotSwitchboard();
+
+        SnapshotTestUtil
+            .Start()
+            .SetOperation(
+                () => switchBoard.SetEntry(10,
+                new int[] {1, 2, 3}))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("SetEntry")
+                    .SetResults(new int[]{ 1, 2, 3 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.Push(10,
+                new int[]{ 8, 9, 10 }))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("Push")
+                    .SetResults(new int[]{ 8, 9, 10, 1, 2, 3 })
+                    .SetRecKey(10)
+                    .SetSuccess(true)
+                    .Build())
+            .Next()
+            .SetOperation(
+                () => switchBoard.GetEntry(10))
+            .SetExpected(
+                InternalSnapshotQueryResult.Make()
+                    .SetCommand("GetEntry")
+                    .SetResults(new int[]{ 8, 9, 10, 1, 2, 3 })
+                    .SetRecKey(10)
                     .SetSuccess(true)
                     .Build())
             .Next()
